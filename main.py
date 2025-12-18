@@ -68,37 +68,34 @@ sale1 = Sale(1, product1, employee1, 2)
 # Show total sale
 print(f"Total sale: ${sale1.total}")
 
+
+ #Create an instance of the product
 def add_product_item():
-   #user enters new item
-   id=int(input("Enter product ID:"))
-   name=input("Enter item name:")
-   description=input("Enter description for item:")
-   price=float(input("Enter price for item:"))
-   stock=int(input("Enter item stock in units:"))
+    # Input a new product or item
+    id = int(input("Enter product ID: "))
+    name = input("Enter product name: ")
+    description = input("Enter product description: ")
+    price = float(input("Enter product price: "))
+    stock = int(input("Enter product stock: "))
+    unique_code = input("Enter unique code for the item (leave blank if not applicable): ")
+    brand_code = input("Enter unique code for the brand (leave blank if not applicable): ")
+    supplier_code = input("Enter unique code for the supplier (leave blank if not applicable): ")
+    group_code = input("Enter group code (e.g., shirts, pants) (leave blank if not applicable): ")
+    material = input("Enter type of material (leave blank if not applicable): ")
+    cost_price = input("Enter cost price (leave blank if not applicable): ")
+    includes_tax = input("Does it include taxes? (yes or no): ").strip().lower() == 'yes'
+    entry_date = datetime.now()  
+    season = input("Enter the season (e.g., Summer, Winter) (leave blank if not applicable): ")
+    price_list_credit = input("Enter the price for credit sales (leave blank if not applicable): ")
+    price_list_cash = input("Enter the price for cash sales (leave blank if not applicable): ")
 
-   unique_code=input("Enter unique code for item (leave blank if not applicable):")
-   brand_code=input("Enter unique code for brand (leave blank if not applicable):")
-   supplier_code=input("Enter unique code for supplier (leave blank if not applicable):")
-   group_code=input("Enter group code (shirts, pants, shorts, etc) (leave blank if not applicable):")
-   material=input("Enter type of fabric for item (leave blank if not applicable):")
-   cost_price=input("Enter cost price for item (leave blank if not applicable):")
-   includes_tax = input("Does it include taxes? (yes or no): ").strip().lower() == 'yes' 
-   entry_date=datetime.now()
-   season=input("Enter season for item (summer, winter, etc)(leave blank if not applicable): ")
-   price_list_credit=input("Enter price for credit sales (leave blank if not applicable)")
-   price_list_cash=input("Enter price for cash sales (leave blank if not applicable)")
-   sizes_input = input("Enter sizes (comma-separated, e.g., S,M,L, leave blank if not applicable): ")
-   sizes = [size.strip() for size in sizes_input.split(",")] if sizes_input else []
+    # Convert prices and cost to a float
+    cost_price = float(cost_price) if cost_price else None
+    price_list_credit = float(price_list_credit) if price_list_credit else None
+    price_list_cash = float(price_list_cash) if price_list_cash else None
 
-   # convert costs and final prices to a float
-   cost_price=float(cost_price) if cost_price else None
-   price_list_credit=float(price_list_credit) if price_list_credit else None
-   price_list_cash=float(price_list_cash) if price_list_cash else None
-
-
-   
-   #Create an instance of the product
-   product_item = Product(
+    # Create an instance of the product
+    product_item = Product(
         id=id,
         name=name,
         description=description,
@@ -114,14 +111,12 @@ def add_product_item():
         entry_date=entry_date,
         season=season if season else None,
         price_list_credit=price_list_credit,
-        price_list_cash=price_list_cash,
-        sizes=sizes
+        price_list_cash=price_list_cash
     )
+
+    return product_item 
  
-   product_item.display_info()
-
-
-
+ 
   #Petty cash
 def manage_petty_cash():
    petty_cash= Pettycash()
@@ -167,23 +162,30 @@ def manage_petty_cash():
          print("Invalid option. Please try again")
 
        
-if __name__=="__main__":
-   manage_petty_cash()
+def main():
+    products = load_products_from_json()
+    while True:
+        action = input("Choose an action: (1) Add Product, (2) View Products, (3) Exit: ").strip()
+        if action == '1':
+            product_item = add_product_item() 
+            products.append(product_item) 
+        
+        elif action == '2':
+           for product in products:
+                product.display_info()
 
+        elif action == '3':
+           save_products_to_json(products)
+           print("Exiting...")
+           break
 
-
-def main ():
- if __name__== "__main__":
-    
-     while True:
-        add_more = input("Do you want to add another product item? (yes or no): ").strip().lower()
-        if add_more == 'yes':
-            add_product_item()  
-        elif add_more == 'no':
-            print("Exiting the program.")
-            break
         else:
-            print("Invalid input, please enter 'yes' or 'no'.")
+            print("Invalid option, please try again.")
 
 
+if __name__ == "__main__":
+   main()
+   manage_petty_cash()
+           
+   
 
