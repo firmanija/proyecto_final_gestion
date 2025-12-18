@@ -26,6 +26,30 @@ class Product:
         self.is_liquidation=is_liquidation       # put items on sale 
         self.sizes = sizes if sizes is not None else []
 
+    def to_dict(self):
+        "Convert the product into a dictionary to facilitate serialization."
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'price': self.price,
+            'stock': self.stock,
+            'unique_code': self.unique_code,
+            'brand_code': self.brand_code,
+            'supplier_code': self.supplier_code,
+            'group_code': self.group_code,
+            'material': self.material,
+            'cost_price': self.cost_price,
+            'includes_tax': self.includes_tax,
+            'entry_date': self.entry_date.isoformat() if self.entry_date else None,
+            'season': self.season,
+            'price_list_credit': self.price_list_credit,
+            'price_list_cash': self.price_list_cash,
+            'liquidation_price': self.liquidation_price,
+            'is_liquidation': self.is_liquidation,
+            'sizes': self.sizes
+              }
+    
     
     def display_info(self):
         """Show product information."""
