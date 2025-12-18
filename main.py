@@ -4,6 +4,7 @@ from sale import Sale
 from inventory import Inventory
 from datetime import datetime
 from supplier import Supllier, SalesRepresentative
+from petty_cash import Pettycash
 
 # Create Sales Representative por suppliers
 rep1=SalesRepresentative(name="Carlos Perez", contact_info="carlos@yourbrand.com")
@@ -92,6 +93,7 @@ def add_product_item():
    price_list_credit=float(price_list_credit) if price_list_credit else None
    price_list_cash=float(price_list_cash) if price_list_cash else None
 
+
    
    #Create an instance of the product
    product_item = Product(
@@ -115,6 +117,58 @@ def add_product_item():
     )
  
    product_item.display_info()
+
+
+
+  #Petty cash
+def manage_petty_cash():
+   petty_cash= Pettycash()
+   employee_id=input("Enter employee id for cash register opening:")
+   inital_amount=float(input("Enter the inital amount left from previous day"))
+   petty_cash.open_cash_register(employee_id, inital_amount)
+
+   while True:
+      action=input("Would you like to (1) add expense, (2) list transactions, "
+      "(3) modify transaction, (4) delete transaction, (5) print closing report, "
+      "(6) close register, or (7) exit? ").strip()
+
+      if action =='1':
+         employee_id=input("Enter your employee ID:")
+         amount=float(input("Enter the expense amount:"))
+         description=input("Enter the expense description:")
+         petty_cash.add_expense(employee_id, amount, description)
+    
+      elif action == '2':
+         petty_cash.list_transactions()
+
+      elif action == '3':
+         index=int(input("Enter the index of the transaction to modify:"))
+         new_amount=float(input("Enter new amount:"))
+         new_description = input("Enter the new description: ")
+         petty_cash.modify_transaction(index, new_amount,new_description)
+      
+      elif action == '4':
+         index=int(input("Enter the index of transaction to delete:"))
+         petty_cash.delete_transaction(index)
+
+      elif action == '5':
+         petty_cash.print_closing_report()
+
+      elif action == '6':
+         petty_cash.close_cash_register()
+         break
+      
+      elif action == '7':
+         print("Exciting petty cash managment.")
+         break
+      else:
+         print("Invalid option. Please try again")
+
+       
+if __name__=="__main__":
+   manage_petty_cash()
+
+
 
 def main ():
  if __name__== "__main__":
