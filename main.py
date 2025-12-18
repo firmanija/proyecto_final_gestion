@@ -6,6 +6,7 @@ from datetime import datetime
 from supplier import Supllier, SalesRepresentative
 from petty_cash import Pettycash
 
+
 # Create Sales Representative por suppliers
 rep1=SalesRepresentative(name="Carlos Perez", contact_info="carlos@yourbrand.com")
 
@@ -172,9 +173,8 @@ if __name__=="__main__":
 
 def main ():
  if __name__== "__main__":
-    main()
     
-    while True:
+     while True:
         add_more = input("Do you want to add another product item? (yes or no): ").strip().lower()
         if add_more == 'yes':
             add_product_item()  
