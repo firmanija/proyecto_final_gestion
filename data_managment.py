@@ -1,5 +1,6 @@
 import json
 from product import Product  
+
 def save_products_to_json(products, filename='products.json'):
     """Saves the list of products to a JSON file."""
     with open(filename, 'w') as file:

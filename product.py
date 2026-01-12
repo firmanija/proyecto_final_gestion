@@ -50,7 +50,7 @@ class Product:
             'liquidation_price': self.liquidation_price,
             'is_liquidation': self.is_liquidation,
             'sizes': self.sizes,
-            'channels':self.channel
+            'channel':self.channel
 
               }
     
