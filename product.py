@@ -92,3 +92,8 @@ class Product:
             self.stock -= quantity        
         else:
             print("Not enough stock.")     
+    
+    def process_return(self, quantity):
+        """Process a return updating stock."""
+        self.add_stock(quantity)  
+        print(f"Processed return of {quantity} for {self.name}. New stock: {self.stock}")

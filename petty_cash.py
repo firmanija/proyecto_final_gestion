@@ -65,3 +65,6 @@ class Pettycash:
         print("Petty cash closing completed.")
         print(f"Final balance: ${self.balance:.2f}")
         self.transaction=[]
+
+    def record_sale_payment(self, amount):
+     self.add_expense(None, amount, "Sale Payment")

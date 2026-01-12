@@ -7,6 +7,7 @@ from supplier import Supllier, SalesRepresentative
 from petty_cash import Pettycash
 from data_managment import save_products_to_json, load_products_from_json
 from transfer import Transfer
+from sales_analysis import SalesAnalysis
 
 # Create Sales Representative for suppliers
 rep1=SalesRepresentative(name="Carlos Perez", contact_info="carlos@yourbrand.com")
@@ -35,6 +36,7 @@ supplier1.display_supplier_info()
 
 # Create inventory and add products
 inventory = Inventory()
+sales_analysis = SalesAnalysis()
 inventory.add_product(product1)
 inventory.add_product(product2)
 
@@ -64,10 +66,11 @@ employee1.display_info()
 
 # Make a sale
 sale1 = Sale(1, product1, employee1, 2)
+sales_analysis.record_sale(product1.name, 2) 
 
 # Show total sale
 print(f"Total sale: ${sale1.total}")
-
+sales_analysis = SalesAnalysis() 
 
  #Create an instance of the product
 def add_product_item():
@@ -140,7 +143,76 @@ def manage_inventory_transfers(inventory):
             print("Invalid option, please try again.")
 
  
-  #Petty cash
+def manage_returns(inventory):
+    while True:
+        return_action = input("Would you like to (1) process return, or (2) exit? ").strip()
+        
+        if return_action == '1':
+            product_id = int(input("Enter product ID to return: "))
+            quantity = int(input("Enter quantity to return: "))
+            product = inventory.get_product(product_id)
+            if product:
+                product.process_return(quantity)  
+            else:
+                print("Product not found in inventory.")
+        
+        elif return_action == '2':
+            print("Exiting returns management.")
+            break
+        
+        else:
+            print("Invalid option, please try again.")
+
+def show_sales_analysis(sales_analysis):
+    """Show Sales Analysis."""
+    print(f"Most Sold Product: {sales_analysis.most_sold_product()}")
+    print(f"Least Sold Product: {sales_analysis.least_sold_product()}")
+
+def main():
+    products = load_products_from_json()
+    sales_analysis = SalesAnalysis()
+    while True:
+        action = input("Choose an action: (1) Add Product, (2) View Products,(3) Manage Returns, (4) Make Sale, (5) Exit: ").strip()
+        if action == '1':
+            product_item = add_product_item() 
+            products.append(product_item)
+            sales_analysis.record_sale(product_item.name, product_item.stock)
+        
+        elif action == '2':
+           for product in products:
+                product.display_info()
+
+        elif action == '3':
+          manage_returns(inventory) 
+
+        elif action == '4':
+           product_id = int(input("Enter product ID to sell: "))
+           quantity = int(input("Enter quantity to sell: "))
+           payment_method_type = input("Enter payment method (1 for Credit Card, 2 for Cash): ").strip()
+           payment_method = credit_card if payment_method_type == '1' else cash
+            
+           product = inventory.get_product(product_id)
+           if product and quantity <= product.stock:
+                sale_id = len(sales_analysis.sales_data) + 1
+
+                sale = Sale(sale_id, product, employee1, quantity, payment_method)
+                sales_analysis.record_sale(product.name, quantity)
+                payment_method.record_payment(sale.total)  
+                print(f"Sale recorded: {quantity} x {product.name} sold. Total: ${sale.total:.2f}")
+           else:
+                print("Product not found or insufficient stock.")
+        
+
+        elif action == '5':
+            save_products_to_json(products)
+            show_sales_analysis(sales_analysis)  # Muestra el análisis de ventas
+            print("Exiting...")
+            break
+        else:
+            print("Invalid option, please try again.")
+  
+
+
 def manage_petty_cash():
    petty_cash= Pettycash()
    employee_id=input("Enter employee id for cash register opening:")
@@ -150,7 +222,7 @@ def manage_petty_cash():
    while True:
       action=input("Would you like to (1) add expense, (2) list transactions, "
       "(3) modify transaction, (4) delete transaction, (5) print closing report, "
-      "(6) close register, or (7) exit? ").strip()
+      "(6) close register,(7) manage returns,  or (8) exit? ").strip()
 
       if action =='1':
          employee_id=input("Enter your employee ID:")
@@ -177,33 +249,17 @@ def manage_petty_cash():
       elif action == '6':
          petty_cash.close_cash_register()
          break
+      elif action =='7':
+           manage_returns(inventory)
       
-      elif action == '7':
+      elif action == '8':
          print("Exciting petty cash managment.")
          break
       else:
          print("Invalid option. Please try again")
 
        
-def main():
-    products = load_products_from_json()
-    while True:
-        action = input("Choose an action: (1) Add Product, (2) View Products, (3) Exit: ").strip()
-        if action == '1':
-            product_item = add_product_item() 
-            products.append(product_item) 
-        
-        elif action == '2':
-           for product in products:
-                product.display_info()
 
-        elif action == '3':
-           save_products_to_json(products)
-           print("Exiting...")
-           break
-
-        else:
-            print("Invalid option, please try again.")
 
 
 if __name__ == "__main__":
@@ -211,6 +267,11 @@ if __name__ == "__main__":
    manage_petty_cash()
    products = load_products_from_json()
    manage_inventory_transfers(inventory)
+   sales_analysis = SalesAnalysis()
+   credit_card = PaymentMethod("Tarjeta de Crédito")
+    cash = PaymentMethod("Efectivo")
+
+
            
    
 
