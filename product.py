@@ -4,7 +4,7 @@ class Product:
     def __init__(self, id, name, description, price, stock, unique_code=None, brand_code=None, 
                  supplier_code=None, group_code=None, material=None, cost_price=None, 
                  includes_tax=False, entry_date=None, season=None, price_list_credit=None,
-                 price_list_cash=None, liquidation_price=None, is_liquidation=False, sizes=None):
+                 price_list_cash=None, liquidation_price=None, is_liquidation=False, sizes=None,channel=None):
         
         self.id=id
         self.name=name
@@ -25,6 +25,8 @@ class Product:
         self.liquidation_price=liquidation_price # price for items on sale 
         self.is_liquidation=is_liquidation       # put items on sale 
         self.sizes = sizes if sizes is not None else []
+        self.channel = channel
+        
 
     def to_dict(self):
         "Convert the product into a dictionary to facilitate serialization."
@@ -47,14 +49,16 @@ class Product:
             'price_list_cash': self.price_list_cash,
             'liquidation_price': self.liquidation_price,
             'is_liquidation': self.is_liquidation,
-            'sizes': self.sizes
+            'sizes': self.sizes,
+            'channels':self.channel
+
               }
     
     
     def display_info(self):
         """Show product information."""
         print(f"ID: {self.id}, Name: {self.name}, Description: {self.description}, "
-              f"Price: {self.price}, Stock: {self.stock}")
+              f"Price: {self.price}, Stock: {self.stock}, Channel: {self.channel}")
         if self.unique_code:
             print(f"Unique Code: {self.unique_code}")
         if self.brand_code:

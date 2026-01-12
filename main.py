@@ -6,9 +6,9 @@ from datetime import datetime
 from supplier import Supllier, SalesRepresentative
 from petty_cash import Pettycash
 from data_managment import save_products_to_json, load_products_from_json
+from transfer import Transfer
 
-
-# Create Sales Representative por suppliers
+# Create Sales Representative for suppliers
 rep1=SalesRepresentative(name="Carlos Perez", contact_info="carlos@yourbrand.com")
 
 #Create Supplier
@@ -88,6 +88,7 @@ def add_product_item():
     season = input("Enter the season (e.g., Summer, Winter) (leave blank if not applicable): ")
     price_list_credit = input("Enter the price for credit sales (leave blank if not applicable): ")
     price_list_cash = input("Enter the price for cash sales (leave blank if not applicable): ")
+    channel = input("Enter the sales channel (e.g., retail, e-commerce, wholesale): ")
 
     # Convert prices and cost to a float
     cost_price = float(cost_price) if cost_price else None
@@ -111,11 +112,33 @@ def add_product_item():
         entry_date=entry_date,
         season=season if season else None,
         price_list_credit=price_list_credit,
-        price_list_cash=price_list_cash
+        price_list_cash=price_list_cash,
+        channel=channel if channel else None
     )
-
+    product_item.display_info()
     return product_item 
  
+def manage_inventory_transfers(inventory):
+    while True:
+        action = input("Would you like to (1) transfer product, (2) list transfers, or (3) exit? ").strip()
+        
+        if action == '1':
+            product_id = int(input("Enter product ID to transfer: "))
+            quantity = int(input("Enter quantity to transfer: "))
+            from_location = input("Enter from location: ")
+            to_location = input("Enter to location: ")
+            inventory.transfer_product(product_id, quantity, from_location, to_location)
+        
+        elif action == '2':
+            inventory.list_transfers()
+        
+        elif action == '3':
+            print("Exiting inventory transfers management.")
+            break
+        
+        else:
+            print("Invalid option, please try again.")
+
  
   #Petty cash
 def manage_petty_cash():
@@ -186,6 +209,8 @@ def main():
 if __name__ == "__main__":
    main()
    manage_petty_cash()
+   products = load_products_from_json()
+   manage_inventory_transfers(inventory)
            
    
 
