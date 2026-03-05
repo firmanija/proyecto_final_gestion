@@ -86,5 +86,27 @@
     "is_liquidation": false,
     "sizes": [],
     "channel": null
+  },
+  {
+    "id": 5,
+    "name": "JOGGING CLASICO",
+    "description": "Jogger clasico de hombre liso",
+    "price": 16.99,
+    "stock": 10,
+    "unique_code": null,
+    "brand_code": null,
+    "supplier_code": null,
+    "group_code": null,
+    "material": null,
+    "cost_price": 8.0,
+    "includes_tax": false,
+    "entry_date": null,
+    "season": null,
+    "price_list_credit": null,
+    "price_list_cash": null,
+    "liquidation_price": null,
+    "is_liquidation": false,
+    "sizes": [],
+    "channel": null
   }
 ]
