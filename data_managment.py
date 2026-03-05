@@ -1,17 +1,27 @@
 import json
-from product import Product  
+from pathlib import Path
+from typing import List, Dict, Any
 
-def save_products_to_json(products, filename='products.json'):
-    """Saves the list of products to a JSON file."""
-    with open(filename, 'w') as file:
-        json.dump([product.to_dict() for product in products], file, indent=4)
+DEFAULT_PATH = Path("products.json")
 
-def load_products_from_json(filename='products.json'):
-    """Uploads products list to a JSON file."""
+
+def save_products_to_json(products: List[Dict[str, Any]], path: Path = DEFAULT_PATH) -> None:
+    """Guarda una lista de dicts (productos) a JSON."""
+    path.write_text(
+        json.dumps(products, ensure_ascii=False, indent=2),
+        encoding="utf-8"
+    )
+
+
+def load_products_from_json(path: Path = DEFAULT_PATH) -> List[Dict[str, Any]]:
+    """Carga una lista de dicts desde JSON. Si no existe, devuelve []."""
+    if not path.exists():
+        return []
+
     try:
-        with open(filename, 'r') as file:
-            products_data = json.load(file)
-            return [Product(**data) for data in products_data]
-    except FileNotFoundError:
-        print(f"{filename} Not found. Returning to empty products.")
+        raw = path.read_text(encoding="utf-8")
+        data = json.loads(raw)
+        return data if isinstance(data, list) else []
+    except (json.JSONDecodeError, OSError):
+        # Archivo corrupto o no legible -> arrancamos vacío
         return []
