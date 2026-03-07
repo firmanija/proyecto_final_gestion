@@ -6,6 +6,7 @@ from product import Product
 from sale import Sales
 from sales_analysis import SalesAnalysis
 from customer import Customer, CustomerManager
+from invoice import InvoiceManager
 
 
 # =========================================================
@@ -196,14 +197,21 @@ def handle_sales_menu(
     inventory: Inventory,
     sales: Sales,
     sales_analysis: SalesAnalysis,
-    petty_cash: Pettycash
+    petty_cash: Pettycash,
+    customers: CustomerManager
 ) -> None:
     while True:
         show_sales_menu()
         choice = input("Opción: ").strip()
 
         if choice == "1":
-            handle_register_sale(inventory, sales, sales_analysis, petty_cash)
+            handle_register_sale(
+                inventory,
+                sales,
+                sales_analysis,
+                petty_cash,
+                customers
+            )
 
         elif choice == "2":
             sales.list_sales()
@@ -224,7 +232,8 @@ def handle_register_sale(
     inventory: Inventory,
     sales: Sales,
     sales_analysis: SalesAnalysis,
-    petty_cash: Pettycash = None
+    petty_cash: Pettycash = None,
+    customers: CustomerManager = None
 ) -> None:
     if not inventory.get_all_products():
         print("No hay productos cargados para vender.")
@@ -257,6 +266,29 @@ def handle_register_sale(
     payment_method = input("Medio de pago (cash/qr/card/transfer): ").strip().lower()
     employee = input("Empleado que realizó la venta: ").strip() or "Sistema"
 
+    customer_id = None
+    customer_name = None
+
+    if customers:
+        use_customer = input("¿Asociar cliente a la venta? (si/no): ").strip().lower()
+
+        if use_customer in ("si", "sí", "s", "yes", "y"):
+            if not customers.get_all_customers():
+                print("No hay clientes registrados. La venta seguirá como Walk-in.")
+            else:
+                customers.list_customers()
+                try:
+                    selected_customer_id = int(input("ID del cliente: ").strip())
+                    customer = customers.get_customer(selected_customer_id)
+
+                    if customer:
+                        customer_id = customer.id
+                        customer_name = customer.name
+                    else:
+                        print("Cliente no encontrado. La venta seguirá como Walk-in.")
+                except ValueError:
+                    print("ID de cliente inválido. La venta seguirá como Walk-in.")
+
     sale_id = sales.get_next_sale_id()
 
     sale = sales.record_sale(
@@ -264,7 +296,9 @@ def handle_register_sale(
         product=product,
         employee=employee,
         quantity=quantity,
-        payment_method=payment_method
+        payment_method=payment_method,
+        customer_id=customer_id,
+        customer_name=customer_name
     )
 
     product.remove_stock(quantity)
@@ -283,25 +317,71 @@ def handle_register_sale(
 # =========================================================
 def show_billing_menu() -> None:
     print("\n--- FACTURACIÓN ---")
-    print("1) Emitir comprobante")
-    print("2) Ver estado del módulo")
+    print("1) Generar factura desde venta")
+    print("2) Ver historial de facturas")
+    print("3) Ver detalle de factura")
     print("0) Volver")
 
 
-def handle_billing_menu() -> None:
+def handle_billing_menu(sales: Sales, invoices: InvoiceManager) -> None:
     while True:
         show_billing_menu()
         choice = input("Opción: ").strip()
 
         if choice == "1":
-            print("Factura generada (simulación).")
-            print("Más adelante acá podés conectar ticket, factura A/B/C o exportación PDF.")
+            handle_generate_invoice_from_sale(sales, invoices)
+
         elif choice == "2":
-            print("Módulo de facturación listo como parte del esqueleto principal.")
+            invoices.list_invoices()
+
+        elif choice == "3":
+            handle_invoice_detail(invoices)
+
         elif choice == "0":
             break
+
         else:
             print("Opción inválida.")
+
+
+def handle_generate_invoice_from_sale(sales: Sales, invoices: InvoiceManager) -> None:
+    if not sales.sales_data:
+        print("No hay ventas registradas para facturar.")
+        return
+
+    sales.list_sales()
+
+    try:
+        sale_id = int(input("ID de la venta a facturar: ").strip())
+    except ValueError:
+        print("ID inválido.")
+        return
+
+    selected_sale = None
+    for sale in sales.sales_data:
+        if sale.id == sale_id:
+            selected_sale = sale
+            break
+
+    if not selected_sale:
+        print("Venta no encontrada.")
+        return
+
+    invoices.create_invoice_from_sale(selected_sale)
+
+
+def handle_invoice_detail(invoices: InvoiceManager) -> None:
+    if not invoices.invoices:
+        print("No hay facturas generadas.")
+        return
+
+    try:
+        invoice_id = int(input("ID de factura: ").strip())
+    except ValueError:
+        print("ID inválido.")
+        return
+
+    invoices.print_invoice_detail(invoice_id)
 
 
 # =========================================================
