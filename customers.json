@@ -1,0 +1,26 @@
+[
+    {
+        "id": 1,
+        "name": "Vicente",
+        "email": "vicente@gmail.com",
+        "phone": "4543412",
+        "address": "sucasa",
+        "tax_id": null
+    },
+    {
+        "id": 2,
+        "name": "Elena",
+        "email": "elena@gmail.com",
+        "phone": "2242345",
+        "address": "su casa",
+        "tax_id": null
+    },
+    {
+        "id": 3,
+        "name": "Lucy",
+        "email": "lucy",
+        "phone": "45644564",
+        "address": "su casita",
+        "tax_id": null
+    }
+]

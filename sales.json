@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1,
+        "product_id": 4,
+        "product_name": "PANTALON CARGO",
+        "employee": "001",
+        "quantity": 3,
+        "payment_method": "EFECTIVO",
+        "customer_id": null,
+        "customer_name": null,
+        "date": "2026-03-07T15:01:54.120272",
+        "total": 62.97
+    },
+    {
+        "id": 2,
+        "product_id": 5,
+        "product_name": "JOGGING CLASICO",
+        "employee": "001",
+        "quantity": 2,
+        "payment_method": "cash",
+        "customer_id": 1,
+        "customer_name": "Vicente",
+        "date": "2026-03-07T15:26:59.447241",
+        "total": 33.98
+    },
+    {
+        "id": 3,
+        "product_id": 2,
+        "product_name": "MC STRIPES",
+        "employee": "002",
+        "quantity": 4,
+        "payment_method": "qr",
+        "customer_id": 3,
+        "customer_name": "Lucy",
+        "date": "2026-03-07T15:33:04.910047",
+        "total": 71.96
+    }
+]

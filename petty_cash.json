@@ -1,0 +1,12 @@
+{
+    "balance": 33.98,
+    "transactions": [
+        {
+            "employee_id": "001",
+            "amount": 33.98,
+            "description": "Cash sale",
+            "transaction_type": "income",
+            "date": "2026-03-07T15:26:59.447325"
+        }
+    ]
+}
