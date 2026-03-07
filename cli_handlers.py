@@ -320,6 +320,8 @@ def show_billing_menu() -> None:
     print("1) Generar factura desde venta")
     print("2) Ver historial de facturas")
     print("3) Ver detalle de factura")
+    print("4) Exportar factura a TXT")
+    print("5) Exportar factura a PDF")
     print("0) Volver")
 
 
@@ -336,6 +338,12 @@ def handle_billing_menu(sales: Sales, invoices: InvoiceManager) -> None:
 
         elif choice == "3":
             handle_invoice_detail(invoices)
+
+        elif choice == "4":
+            handle_export_invoice_txt(invoices)
+
+        elif choice == "5":
+            handle_export_invoice_pdf(invoices)
 
         elif choice == "0":
             break
@@ -382,6 +390,34 @@ def handle_invoice_detail(invoices: InvoiceManager) -> None:
         return
 
     invoices.print_invoice_detail(invoice_id)
+
+
+def handle_export_invoice_txt(invoices: InvoiceManager) -> None:
+    if not invoices.invoices:
+        print("No hay facturas generadas.")
+        return
+
+    try:
+        invoice_id = int(input("ID de factura a exportar: ").strip())
+    except ValueError:
+        print("ID inválido.")
+        return
+
+    invoices.export_invoice_to_txt(invoice_id)
+
+
+def handle_export_invoice_pdf(invoices: InvoiceManager) -> None:
+    if not invoices.invoices:
+        print("No hay facturas generadas.")
+        return
+
+    try:
+        invoice_id = int(input("ID de factura a exportar en PDF: ").strip())
+    except ValueError:
+        print("ID inválido.")
+        return
+
+    invoices.export_invoice_to_pdf(invoice_id)
 
 
 # =========================================================

@@ -1,4 +1,7 @@
+import os
 from datetime import datetime
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
 
 
 class Invoice:
@@ -134,6 +137,92 @@ class InvoiceManager:
         print(f"Quantity: {invoice.quantity}")
         print(f"Payment method: {invoice.payment_method}")
         print(f"Total: ${invoice.total:.2f}")
+
+    def export_invoice_to_txt(self, invoice_id, folder="invoices_txt"):
+        invoice = self.get_invoice_by_id(invoice_id)
+        if not invoice:
+            print("Invoice not found.")
+            return
+
+        os.makedirs(folder, exist_ok=True)
+
+        filename = f"invoice_{invoice.id}.txt"
+        filepath = os.path.join(folder, filename)
+
+        content = (
+            "========================================\n"
+            "              SALES INVOICE             \n"
+            "========================================\n"
+            f"Invoice ID: {invoice.id}\n"
+            f"Sale ID: {invoice.sale_id}\n"
+            f"Date: {invoice.date.strftime('%Y-%m-%d %H:%M:%S')}\n"
+            f"Customer: {invoice.customer_name}\n"
+            f"Customer ID: {invoice.customer_id if invoice.customer_id else '-'}\n"
+            "----------------------------------------\n"
+            f"Product: {invoice.product_name}\n"
+            f"Quantity: {invoice.quantity}\n"
+            f"Payment method: {invoice.payment_method}\n"
+            f"Total: ${invoice.total:.2f}\n"
+            "========================================\n"
+        )
+
+        with open(filepath, "w", encoding="utf-8") as file:
+            file.write(content)
+
+        print(f"Invoice exported successfully: {filepath}")
+
+    def export_invoice_to_pdf(self, invoice_id, folder="invoices_pdf"):
+        invoice = self.get_invoice_by_id(invoice_id)
+        if not invoice:
+            print("Invoice not found.")
+            return
+
+        os.makedirs(folder, exist_ok=True)
+
+        filename = f"invoice_{invoice.id}.pdf"
+        filepath = os.path.join(folder, filename)
+
+        pdf = canvas.Canvas(filepath, pagesize=A4)
+        width, height = A4
+
+        y = height - 60
+
+        pdf.setFont("Helvetica-Bold", 16)
+        pdf.drawString(180, y, "SALES INVOICE")
+
+        y -= 40
+        pdf.setFont("Helvetica", 12)
+
+        pdf.drawString(50, y, f"Invoice ID: {invoice.id}")
+        y -= 20
+        pdf.drawString(50, y, f"Sale ID: {invoice.sale_id}")
+        y -= 20
+        pdf.drawString(50, y, f"Date: {invoice.date.strftime('%Y-%m-%d %H:%M:%S')}")
+        y -= 20
+        pdf.drawString(50, y, f"Customer: {invoice.customer_name}")
+        y -= 20
+        pdf.drawString(50, y, f"Customer ID: {invoice.customer_id if invoice.customer_id else '-'}")
+
+        y -= 35
+        pdf.line(50, y, 550, y)
+
+        y -= 25
+        pdf.drawString(50, y, f"Product: {invoice.product_name}")
+        y -= 20
+        pdf.drawString(50, y, f"Quantity: {invoice.quantity}")
+        y -= 20
+        pdf.drawString(50, y, f"Payment method: {invoice.payment_method}")
+
+        y -= 35
+        pdf.line(50, y, 550, y)
+
+        y -= 30
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.drawString(50, y, f"TOTAL: ${invoice.total:.2f}")
+
+        pdf.save()
+
+        print(f"PDF invoice exported successfully: {filepath}")
 
     def to_dict_list(self):
         return [invoice.to_dict() for invoice in self.invoices]

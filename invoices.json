@@ -1,0 +1,13 @@
+[
+    {
+        "id": 1,
+        "sale_id": 3,
+        "customer_id": 3,
+        "customer_name": "Lucy",
+        "product_name": "MC STRIPES",
+        "quantity": 4,
+        "payment_method": "qr",
+        "total": 71.96,
+        "date": "2026-03-07T15:33:29.180334"
+    }
+]

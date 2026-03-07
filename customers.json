@@ -14,5 +14,13 @@
         "phone": "2242345",
         "address": "su casa",
         "tax_id": null
+    },
+    {
+        "id": 3,
+        "name": "Lucy",
+        "email": "lucy",
+        "phone": "45644564",
+        "address": "su casita",
+        "tax_id": null
     }
 ]

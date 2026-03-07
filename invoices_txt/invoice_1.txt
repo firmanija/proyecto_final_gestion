@@ -1,0 +1,14 @@
+========================================
+              SALES INVOICE             
+========================================
+Invoice ID: 1
+Sale ID: 3
+Date: 2026-03-07 15:33:29
+Customer: Lucy
+Customer ID: 3
+----------------------------------------
+Product: MC STRIPES
+Quantity: 4
+Payment method: qr
+Total: $71.96
+========================================
