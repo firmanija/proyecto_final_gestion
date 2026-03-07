@@ -48,7 +48,7 @@ class Sale:
         return cls(
             id=data["id"],
             product=product,
-            employee=data["employee"],
+            employee=data.get("employee", "Sistema"),
             quantity=data["quantity"],
             payment_method=data["payment_method"],
             customer_id=data.get("customer_id"),

@@ -1,3 +1,4 @@
+from auth import login
 from inventory import Inventory
 from petty_cash import Pettycash
 from product import Product
@@ -5,6 +6,7 @@ from sale import Sales
 from sales_analysis import SalesAnalysis
 from customer import CustomerManager
 from invoice import InvoiceManager
+from dashboard import Dashboard
 
 from data_managment import (
     save_products_to_json,
@@ -41,6 +43,11 @@ def seed(
 
 
 def main() -> None:
+    current_user = login()
+    if not current_user:
+        print("Login failed. Exiting system.")
+        return
+
     inventory = Inventory()
     petty_cash = Pettycash()
     sales = Sales()
@@ -76,31 +83,45 @@ def main() -> None:
     invoices_data = load_invoices_from_json()
     invoices.load_from_dict_list(invoices_data)
 
+    dashboard = Dashboard(inventory, sales, petty_cash)
+
     seed(inventory, petty_cash, sales, sales_analysis, customers, invoices)
+
+    print(f"\nLogged in as: {current_user.username} ({current_user.role})")
 
     while True:
         show_main_menu()
         choice = input("Seleccioná una opción: ").strip()
 
         if choice == "1":
-            handle_inventory_menu(inventory)
+            dashboard.show_dashboard()
 
         elif choice == "2":
-            handle_sales_menu(inventory, sales, sales_analysis, petty_cash, customers)
+            handle_inventory_menu(inventory)
 
         elif choice == "3":
-            handle_billing_menu(sales, invoices)
+            handle_sales_menu(
+                inventory,
+                sales,
+                sales_analysis,
+                petty_cash,
+                customers,
+                current_user
+            )
 
         elif choice == "4":
-            handle_petty_cash_menu(petty_cash)
+            handle_billing_menu(sales, invoices)
 
         elif choice == "5":
-            handle_reports_menu(inventory, sales_analysis)
+            handle_petty_cash_menu(petty_cash)
 
         elif choice == "6":
-            handle_transfers_menu(inventory)
+            handle_reports_menu(inventory, sales_analysis, sales)
 
         elif choice == "7":
+            handle_transfers_menu(inventory)
+
+        elif choice == "8":
             handle_customers_menu(customers)
 
         elif choice == "0":
