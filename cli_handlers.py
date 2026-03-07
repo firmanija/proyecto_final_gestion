@@ -5,6 +5,7 @@ from petty_cash import Pettycash
 from product import Product
 from sale import Sales
 from sales_analysis import SalesAnalysis
+from customer import Customer, CustomerManager
 
 
 # =========================================================
@@ -20,6 +21,7 @@ def show_main_menu() -> None:
     print("4) Caja chica")
     print("5) Reportes")
     print("6) Transferencias")
+    print("7) Clientes")
     print("0) Salir")
 
 
@@ -168,7 +170,9 @@ def handle_delete_product(inventory: Inventory) -> None:
 
 
 def handle_clear_products(inventory: Inventory) -> None:
-    confirm = input("¿Seguro que querés borrar TODOS los productos? (si/no): ").strip().lower()
+    confirm = input(
+        "¿Seguro que querés borrar TODOS los productos? (si/no): "
+    ).strip().lower()
 
     if confirm in ("si", "sí", "s", "yes", "y"):
         inventory.clear_products()
@@ -183,22 +187,35 @@ def handle_clear_products(inventory: Inventory) -> None:
 def show_sales_menu() -> None:
     print("\n--- VENTAS ---")
     print("1) Registrar venta")
-    print("2) Ver módulo ventas")
+    print("2) Ver historial de ventas")
+    print("3) Ver resumen de ventas")
     print("0) Volver")
 
 
-def handle_sales_menu(inventory: Inventory, sales: Sales, sales_analysis: SalesAnalysis) -> None:
+def handle_sales_menu(
+    inventory: Inventory,
+    sales: Sales,
+    sales_analysis: SalesAnalysis,
+    petty_cash: Pettycash
+) -> None:
     while True:
         show_sales_menu()
         choice = input("Opción: ").strip()
 
         if choice == "1":
-            handle_register_sale(inventory, sales, sales_analysis)
+            handle_register_sale(inventory, sales, sales_analysis, petty_cash)
+
         elif choice == "2":
-            print("Módulo ventas preparado para expansión web.")
-            print("Acá después podés listar ventas, filtrar por fecha, cliente o medio de pago.")
+            sales.list_sales()
+
+        elif choice == "3":
+            print("\n--- RESUMEN DE VENTAS ---")
+            print(f"Cantidad total de ventas: {sales.get_sales_count()}")
+            print(f"Recaudación total: ${sales.get_total_revenue():.2f}")
+
         elif choice == "0":
             break
+
         else:
             print("Opción inválida.")
 
@@ -206,7 +223,8 @@ def handle_sales_menu(inventory: Inventory, sales: Sales, sales_analysis: SalesA
 def handle_register_sale(
     inventory: Inventory,
     sales: Sales,
-    sales_analysis: SalesAnalysis
+    sales_analysis: SalesAnalysis,
+    petty_cash: Pettycash = None
 ) -> None:
     if not inventory.get_all_products():
         print("No hay productos cargados para vender.")
@@ -236,12 +254,12 @@ def handle_register_sale(
         print("No hay stock suficiente.")
         return
 
-    payment_method = input("Medio de pago: ").strip() or "Efectivo"
+    payment_method = input("Medio de pago (cash/qr/card/transfer): ").strip().lower()
     employee = input("Empleado que realizó la venta: ").strip() or "Sistema"
 
-    sale_id = len(sales.sales_data) + 1
+    sale_id = sales.get_next_sale_id()
 
-    sales.record_sale(
+    sale = sales.record_sale(
         id=sale_id,
         product=product,
         employee=employee,
@@ -252,7 +270,11 @@ def handle_register_sale(
     product.remove_stock(quantity)
     sales_analysis.record_sale(product.name, quantity)
 
-    total = product.price * quantity
+    total = sale.total
+
+    if petty_cash and payment_method in ["cash", "efectivo"]:
+        petty_cash.add_income(employee, total, "Cash sale")
+
     print(f"Venta registrada correctamente. Total: ${total:.2f}")
 
 
@@ -288,9 +310,12 @@ def handle_billing_menu() -> None:
 def show_petty_cash_menu() -> None:
     print("\n--- CAJA CHICA ---")
     print("1) Abrir caja")
-    print("2) Registrar gasto")
-    print("3) Ver movimientos")
-    print("4) Cierre de caja")
+    print("2) Registrar ingreso")
+    print("3) Registrar gasto")
+    print("4) Ver movimientos")
+    print("5) Modificar movimiento")
+    print("6) Eliminar movimiento")
+    print("7) Cierre de caja")
     print("0) Volver")
 
 
@@ -310,26 +335,54 @@ def handle_petty_cash_menu(petty_cash: Pettycash) -> None:
         elif choice == "2":
             try:
                 employee_id = input("Empleado responsable: ").strip() or "Sistema"
+                amount = float(input("Monto del ingreso: ").strip())
+                description = input("Descripción: ").strip() or "Ingreso sin detalle"
+                petty_cash.add_income(employee_id, amount, description)
+            except ValueError:
+                print("Monto inválido.")
+
+        elif choice == "3":
+            try:
+                employee_id = input("Empleado responsable: ").strip() or "Sistema"
                 amount = float(input("Monto del gasto: ").strip())
                 description = input("Descripción: ").strip() or "Gasto sin detalle"
                 petty_cash.add_expense(employee_id, amount, description)
             except ValueError:
                 print("Monto inválido.")
 
-        elif choice == "3":
-            if not petty_cash.transactions:
-                print("No hay movimientos registrados.")
-            else:
-                print("\nMovimientos de caja:")
-                for i, trans in enumerate(petty_cash.transactions, start=1):
-                    print(
-                        f"{i}) {trans.date.strftime('%Y-%m-%d %H:%M:%S')} | "
-                        f"{trans.description} | ${trans.amount:.2f} | "
-                        f"Empleado: {trans.employee_id}"
-                    )
-                print(f"Saldo actual: ${petty_cash.balance:.2f}")
-
         elif choice == "4":
+            petty_cash.list_transactions()
+            print(f"Saldo actual: ${petty_cash.balance:.2f}")
+
+        elif choice == "5":
+            if not petty_cash.transactions:
+                print("No hay movimientos para modificar.")
+                continue
+
+            petty_cash.list_transactions()
+
+            try:
+                index = int(input("Número de movimiento a modificar: ").strip()) - 1
+                new_amount = float(input("Nuevo monto: ").strip())
+                new_description = input("Nueva descripción: ").strip() or "Movimiento editado"
+                petty_cash.modify_transaction(index, new_amount, new_description)
+            except ValueError:
+                print("Datos inválidos.")
+
+        elif choice == "6":
+            if not petty_cash.transactions:
+                print("No hay movimientos para eliminar.")
+                continue
+
+            petty_cash.list_transactions()
+
+            try:
+                index = int(input("Número de movimiento a eliminar: ").strip()) - 1
+                petty_cash.delete_transaction(index)
+            except ValueError:
+                print("Índice inválido.")
+
+        elif choice == "7":
             petty_cash.print_closing_report()
 
         elif choice == "0":
@@ -404,7 +457,12 @@ def handle_transfers_menu(inventory: Inventory) -> None:
                 from_location = input("Desde ubicación: ").strip()
                 to_location = input("Hacia ubicación: ").strip()
 
-                inventory.transfer_product(product_id, quantity, from_location, to_location)
+                inventory.transfer_product(
+                    product_id,
+                    quantity,
+                    from_location,
+                    to_location
+                )
             except ValueError:
                 print("Datos inválidos.")
 
@@ -419,3 +477,106 @@ def handle_transfers_menu(inventory: Inventory) -> None:
 
         else:
             print("Opción inválida.")
+
+
+# =========================================================
+# CLIENTES
+# =========================================================
+def show_customers_menu() -> None:
+    print("\n--- CLIENTES ---")
+    print("1) Agregar cliente")
+    print("2) Ver clientes")
+    print("3) Buscar cliente por nombre")
+    print("4) Eliminar cliente")
+    print("0) Volver")
+
+
+def handle_customers_menu(customers: CustomerManager) -> None:
+    while True:
+        show_customers_menu()
+        choice = input("Opción: ").strip()
+
+        if choice == "1":
+            handle_add_customer(customers)
+        elif choice == "2":
+            customers.list_customers()
+        elif choice == "3":
+            handle_search_customer(customers)
+        elif choice == "4":
+            handle_delete_customer(customers)
+        elif choice == "0":
+            break
+        else:
+            print("Opción inválida.")
+
+
+def handle_add_customer(customers: CustomerManager) -> None:
+    print("\n--- Agregar cliente ---")
+
+    try:
+        customer_id_input = input("ID cliente (Enter para automático): ").strip()
+        if customer_id_input:
+            customer_id = int(customer_id_input)
+        else:
+            customer_id = customers.get_next_customer_id()
+    except ValueError:
+        print("ID inválido.")
+        return
+
+    if customers.has_customer(customer_id):
+        print("Ya existe un cliente con ese ID.")
+        return
+
+    name = input("Nombre (requerido): ").strip()
+    if not name:
+        print("El nombre no puede estar vacío.")
+        return
+
+    email = input("Email: ").strip() or None
+    phone = input("Teléfono: ").strip() or None
+    address = input("Dirección: ").strip() or None
+    tax_id = input("CUIT / Tax ID: ").strip() or None
+
+    customer = Customer(
+        id=customer_id,
+        name=name,
+        email=email,
+        phone=phone,
+        address=address,
+        tax_id=tax_id,
+    )
+
+    customers.add_customer(customer)
+
+
+def handle_search_customer(customers: CustomerManager) -> None:
+    query = input("Nombre a buscar: ").strip()
+    if not query:
+        print("La búsqueda no puede estar vacía.")
+        return
+
+    results = customers.search_by_name(query)
+
+    if not results:
+        print("No se encontraron clientes.")
+        return
+
+    print("\n--- RESULTADOS ---")
+    for customer in results:
+        print(
+            f"ID: {customer.id} | "
+            f"Name: {customer.name} | "
+            f"Email: {customer.email or '-'} | "
+            f"Phone: {customer.phone or '-'} | "
+            f"Tax ID: {customer.tax_id or '-'}"
+        )
+
+
+def handle_delete_customer(customers: CustomerManager) -> None:
+    try:
+        customer_id = int(input("ID del cliente a eliminar: ").strip())
+    except ValueError:
+        print("ID inválido.")
+        return
+
+    customers.delete_customer(customer_id)
