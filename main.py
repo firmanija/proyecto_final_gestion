@@ -1,3 +1,4 @@
+from auth import login
 from inventory import Inventory
 from petty_cash import Pettycash
 from product import Product
@@ -42,6 +43,11 @@ def seed(
 
 
 def main() -> None:
+    current_user = login()
+    if not current_user:
+        print("Login failed. Exiting system.")
+        return
+
     inventory = Inventory()
     petty_cash = Pettycash()
     sales = Sales()
@@ -81,6 +87,8 @@ def main() -> None:
 
     seed(inventory, petty_cash, sales, sales_analysis, customers, invoices)
 
+    print(f"\nLogged in as: {current_user.username} ({current_user.role})")
+
     while True:
         show_main_menu()
         choice = input("Seleccioná una opción: ").strip()
@@ -92,7 +100,14 @@ def main() -> None:
             handle_inventory_menu(inventory)
 
         elif choice == "3":
-            handle_sales_menu(inventory, sales, sales_analysis, petty_cash, customers)
+            handle_sales_menu(
+                inventory,
+                sales,
+                sales_analysis,
+                petty_cash,
+                customers,
+                current_user
+            )
 
         elif choice == "4":
             handle_billing_menu(sales, invoices)

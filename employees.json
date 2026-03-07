@@ -1,0 +1,10 @@
+[
+    {
+        "id": 1,
+        "name": "bruno",
+        "username": "bruno",
+        "password_hash": "ccc68482d9e0eee0789e64c7674421076738f8836857ea89bcd0afb832bf3fc3",
+        "role": "admin",
+        "created_at": "2026-03-07T16:45:26.482038"
+    }
+]
